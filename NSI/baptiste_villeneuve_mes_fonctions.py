@@ -3,7 +3,7 @@ import os
 import csv
 from tkinter import filedialog, Tk
 
-#a)
+
 def lire_csv_dictionnaire(nomFichier):
     csvfile = open(nomFichier, "r")
     contenu = csv.DictReader(csvfile, delimiter=';')
@@ -13,15 +13,18 @@ def lire_csv_dictionnaire(nomFichier):
     csvfile.close()
     return(table)
 
-#b)
+
 def lire_csv_list(nomFichier):
     liste = list()
     with open(nomFichier, "r") as fichier:
         for ligne in fichier:
-            liste.append(ligne.rstrip("\n").split(";"))
+            if ";" in ligne:
+                liste.append(ligne.rstrip("\n").split(";"))
+            else:
+                liste.append(ligne.rstrip("\n").split(","))
     return liste
 
-#c)
+
 def ecrire_Dans_CSV_dictionnaire(nomFichierCSV, listeDict):
     with open(nomFichierCSV, 'w', newline="") as csv_file:
         enTete = [cle for cle in listeDict[0].keys()]
@@ -33,25 +36,15 @@ def ecrire_Dans_CSV_dictionnaire(nomFichierCSV, listeDict):
                 del(ligne[None])
             contenant.writerow(ligne)
 
-#d)
+
 def ecrire_Dans_CSV_list(nomFichierCSV, listeList):
     with open(nomFichierCSV, 'w', newline="") as csv_file:
         for ligne in listeList:
             csv_file.write(";".join(ligne) + "\n")
 
-#e)
-def rechercheFichier(titre, fileTypes: list, rep=os.getcwd()):
-    fic = ""
-    root = Tk()
-    root.withdraw()
-    nomfichier = filedialog.askopenfilename(title=titre, initialdir=rep,
-    initialfile=fic, filetypes=fileTypes)
-    root.destroy()
-    return(nomfichier)
 
 
-#f)
-def remplacer_string_par_int(nomFichier, colonnesAConvertir: list = [1, 2]):
+def remplacer_string_par_int(nomFichier, colonnesAConvertir: list = [1, 2], get = False):
     with open(nomFichier, "r") as fichier:
         fichierConverti = None
         for ligne in fichier:
@@ -77,21 +70,13 @@ def remplacer_string_par_int(nomFichier, colonnesAConvertir: list = [1, 2]):
                     fichierConverti += ";"
                 fichierConverti += "\n"
 
-    with open(nomFichier, "w") as fichier:
-        fichier.write(fichierConverti)
+    if get:
+        return fichierConverti
+    else:
+        with open(nomFichier, "w") as fichier:
+            fichier.write(fichierConverti)
 
-#g)
-def supprimerDoublons(nomFichier):
-    fichierSansDoublons = ""
-    with open(nomFichier, "r") as fichier:
-        for ligne in fichier:
-            if not ligne in fichierSansDoublons:
-                fichierSansDoublons += ligne
 
-    with open(nomFichier, "w") as fichier:
-        fichier.write(fichierSansDoublons)
-
-#h)
 def trierColonne(nomFichier, colonneATrier: int, croissant=True, inclureLaPremiereLigne=True):
     with open(nomFichier, "r") as fichier:
         listeDeLignes = fichier.readlines()
@@ -134,21 +119,7 @@ def trierColonne(nomFichier, colonneATrier: int, croissant=True, inclureLaPremie
                 listeDeLignesTrie[i] += "\n"
         fichier.write("".join(listeDeLignesTrie))
 
-#i)
-def supprimerColonne(nomFichier, colonneASupprimer: int):
-    fichierAvecLaColonneEnMoins = ""
-    with open(nomFichier,"r") as fichier:
-        listeDeLignes = fichier.readlines()
-        for ligne in listeDeLignes:
-            ligne = ligne.rstrip("\n")
-            ligne = ligne.split(";")
-            del(ligne[colonneASupprimer])
-            fichierAvecLaColonneEnMoins += ";".join(ligne) + "\n"
-            
-    with open(nomFichier,"w") as fichier:
-        fichier.write(fichierAvecLaColonneEnMoins)
 
-#j)
 def ajoutDensite(nomFichier):
     remplacer_string_par_int(nomFichier,colonnesAConvertir=[1,2])
     listeDictionnaire = lire_csv_dictionnaire(nomFichier)
@@ -157,7 +128,7 @@ def ajoutDensite(nomFichier):
     
     ecrire_Dans_CSV_dictionnaire(nomFichier,listeDictionnaire)
 
-#k)
+
 def fusionDeDeuxTablesAyantuneCleeCommune(table1 : list,table2 : list,cleCommune):
     for dico1 in table1:
         for dico2 in table2:
@@ -168,30 +139,7 @@ def fusionDeDeuxTablesAyantuneCleeCommune(table1 : list,table2 : list,cleCommune
 
     return table1
 
-#l)
-def selecLigneDict(listeDict,cle,signe,critere):
-    listDict2 = []
-    for dico in listeDict:
-        try:
-            if signe == ">":
-                if dico[cle] > critere:
-                    listDict2.append(dico["Pays"])
-            elif signe == "<":
-                if dico[cle] < critere:
-                    listDict2.append(dico["Pays"])
-            elif signe == "!=":
-                if dico[cle] != critere:
-                    listDict2.append(dico["Pays"])
-            elif signe == "=":
-                if dico[cle] == critere:
-                    listDict2.append(dico["Pays"])
-        except:
-            pass
 
-    return listDict2
-assert selecLigneDict([{"Pays" : "France", "population" : 65},{"Pays" : "Allemagne", "population" : 85},{"Pays" : "Italie","population" : 60}], "population","<",70) == ["France","Italie"]
-
-#k)
 if __name__ == "__main__": 
     listePays = lire_csv_dictionnaire("Monde_Nbre_Habitants_2019_Superficie.csv")
     listeMonaie = lire_csv_dictionnaire("Monde_Monnaie.csv")
